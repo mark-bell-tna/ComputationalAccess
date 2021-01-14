@@ -4,16 +4,19 @@ import re
 
 class UKGWAIndex:
 
-    def __init__(self):
+    def __init__(self, ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/",
+                       index_url = "http://www.nationalarchives.gov.uk/webarchive/atoz/",
+                       id_prefix = "UKGWA",
+                       file_delimiter = "|"):
 
         self.index = {}
         self.discoverylookup = {}
         self.iterindex = 1
         self.maxindex = 0
-        self.filedelimiter = "|"
-        self.ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/"
-        self.atoz_url = "http://www.nationalarchives.gov.uk/webarchive/atoz/"
-        self.id_prefix = "UKGWA"
+        self.filedelimiter = file_delimiter
+        self.ukgwa_prefix = ukgwa_prefix
+        self.atoz_url = index_url
+        self.id_prefix = id_prefix
 
     def indexfromfile(self, filepath):
 
@@ -32,17 +35,25 @@ class UKGWAIndex:
             indexfile.write("\n")
         indexfile.close()
 
-    def discoveryfromfile(self, filepath):
+    def discoveryfromfile(self, filepath, update=True):
 
         discoveryfile = open(filepath, 'r')
+        for row in discoveryfile:
+            fields = row[:-1].split(self.filedelimiter)
+            self.discoverylookup[fields[2]] = fields[0]
         discoveryfile.close()
+        for k,v in self.discoverylookup.items():
+            break
+
+        if update:
+            self.matchukgwatodiscovery()
 
     def matchukgwatodiscovery(self):
 
         for v in self.index.values():
-            url = v[2]
+            url = v[3]
             if url in self.discoverylookup:
-                v[3] = self.discoverylookup[url]
+                v[4] = self.discoverylookup[url]
 
     def indexfromweb(self):
 
