@@ -7,7 +7,7 @@ class QueryEngine:
     def set_select(self, identifier, select_value, override = False):
 
         if not override:
-            if identifier in select_value:
+            if identifier in self.selections:
                 return
         self.selections[identifier] = select_value
         
