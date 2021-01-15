@@ -29,10 +29,9 @@ class QueryEngine:
     def __next__(self):
 
         next_item =  next(self.select_iter)
-        if self.selections[next_item]:
-            return next_item
-        else:
-            return next(self)
+        while not next_item:
+            next_item = next(self.select_iter)
+        return next_item
 
 if __name__ == '__main__':
     Q = QueryEngine()
@@ -41,3 +40,7 @@ if __name__ == '__main__':
     print(Q.selections)
     for s in Q:
         print(s)
+    Q.set_select(3, False, False)
+    print(Q.selections[3])
+    Q.set_select(3, False, True)
+    print(Q.selections[3])
