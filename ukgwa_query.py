@@ -1,10 +1,31 @@
+from ukgwa_view import UKGWAView
+
 class QueryEngine:
 
     def __init__(self):
 
         self.selections = {}
+        self.views = {}
 
-    def set_select(self, identifier, select_value, override = False):
+    def add_view(self, identifier, view):
+        self.views[identifier] = view
+
+    def filter_view(self, identifier, *args):
+        view = self.views[identifier]
+        for idx in view:
+            if view.comparison(idx, *args):
+                yield idx
+
+    def exclude(self, identifier):
+        self._set_select(identifier, False, override = True)
+
+    def include(self, identifier):
+        self._set_select(identifier, True)
+
+    def update(self, identifier, value):
+        self._set_select(identifier, value, override = True)
+
+    def _set_select(self, identifier, select_value, override = False):
 
         if not override:
             if identifier in self.selections:
@@ -36,11 +57,14 @@ class QueryEngine:
 if __name__ == '__main__':
     Q = QueryEngine()
     for i in range(20):
-        Q.set_select(i, i % 3 == 0)
+        Q.update(i, i % 3 == 0)
     print(Q.selections)
     for s in Q:
         print(s)
-    Q.set_select(3, False, False)
     print(Q.selections[3])
-    Q.set_select(3, False, True)
+    Q.exclude(3)
+    print(Q.selections[3])
+    Q.include(3)
+    print(Q.selections[3])
+    Q.update(3, True)
     print(Q.selections[3])

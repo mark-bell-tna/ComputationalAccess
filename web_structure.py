@@ -5,21 +5,26 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 import re
 import sys
+from ukgwa_view import UKGWAView
 
-class UKGWAStructure:
+class UKGWAStructure(UKGWAView):
 
     def __init__(self):
 
-        x = 1
-        self.index = {}
+        super().__init__()
+        self.fields['SCHEME'] = 0
+        self.fields['NETLOC'] = 1
+        self.fields['PATH'] = 2
+        self.fields['QUERY'] = 3
 
-    def loadurl(self, url, identifier = None):
+    def add_entry(self, url, identifier = None):
 
         if identifier is None:
             identifier = url
-        self.index[identifier] = self.parseurl(url)
+        parsed = self.parseurl(url)
+        super().add_entry(self.index[identifier], [parsed.schem, parsed.netloc, parsed.path, parsed.query])
 
-    def parseurl(self, url):
+    def _parseurl(self, url):
 
         if url[:4] != "http":
             url = "https://" + url
@@ -39,13 +44,13 @@ class UKGWAStructure:
 
 if __name__ == "__main__":
     struc = UKGWAStructure()
-    parsed = struc.parseurl("http://www.gov.uk/guidance")
+    parsed = struc._parseurl("http://www.gov.uk/guidance")
     print(struc.domaintotree(parsed.netloc))
     print(struc.domaintotree(parsed.netloc, strip_www = True))
     print(struc.domaintotree(parsed.netloc, path = parsed.path, strip_www = True))
     exit()
-    struc.loadurl("www.gov.uk", 5)
+    struc.add_entry("www.gov.uk", 5)
     print(struc.index)
-    struc.loadurl("www.gov.uk")
+    struc.add_entry("www.gov.uk")
     print(struc.index)
 

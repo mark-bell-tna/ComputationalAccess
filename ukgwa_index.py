@@ -1,18 +1,24 @@
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
 import re
+from ukgwa_view import UKGWAView
+from ukgwa_query import QueryEngine
 
-class UKGWAIndex:
+class UKGWAIndex(UKGWAView):
 
     def __init__(self, ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/",
                        index_url = "http://www.nationalarchives.gov.uk/webarchive/atoz/",
                        id_prefix = "UKGWA",
                        file_delimiter = "|"):
 
-        self.index = {}
+        super().__init__()
+        # self.add_entry(reference, [reference, link.text.replace("\n"," ").strip(), category, href, 'N'])
+        self.fields['REF'] = 0
+        self.fields['TEXT'] = 1
+        self.fields['CAT'] = 2
+        self.fields['URL'] = 3
+        self.fields['CATREF'] = 4
         self.discoverylookup = {}
-        self.iterindex = 1
-        self.maxindex = 0
         self.filedelimiter = file_delimiter
         self.ukgwa_prefix = ukgwa_prefix
         self.atoz_url = index_url
@@ -31,7 +37,7 @@ class UKGWAIndex:
         
         indexfile = open(filepath, 'w')
         for idx in self:
-            indexfile.write(self.filedelimiter.join([str(x) for x in idx]))
+            indexfile.write(self.filedelimiter.join([str(x) for x in self.index[idx]]))
             indexfile.write("\n")
         indexfile.close()
 
@@ -50,10 +56,10 @@ class UKGWAIndex:
 
     def matchukgwatodiscovery(self):
 
-        for v in self.index.values():
-            url = v[3]
+        for idx in self:
+            url = idx.get_field(idx, 'URL')
             if url in self.discoverylookup:
-                v[4] = self.discoverylookup[url]
+                idx.update_field(idx, 'CATREF', self.discoverylookup[url])
 
     def indexfromweb(self):
 
@@ -74,30 +80,38 @@ class UKGWAIndex:
                 continue
             row_id += 1
             reference = self.id_prefix + "." + str(row_id)
-            self.index[reference] = [reference, link.text.replace("\n"," ").strip(), category, href, 'N']
+            self.add_entry(reference, [reference, link.text.replace("\n"," ").strip(), category, href, 'N'])
         self.maxindex = row_id
 
-    def indexlookup(self, key):
-        if key in self.index:
-            return self.index[key]
-        return []
-
-    def __iter__(self):
-        self.iterindex = 1
-        return self
-
-    def __next__(self):
-        if self.iterindex > self.maxindex:
-            raise StopIteration
-
-        next_reference = self.id_prefix + "." + str(self.iterindex)
-        self.iterindex += 1
-        return self.index[next_reference]
+#    def __iter__(self):
+#        self.iterindex = 1
+#        return self
+#
+#    def __next__(self):
+#        if self.iterindex > self.maxindex:
+#            raise StopIteration
+#
+#        next_reference = self.id_prefix + "." + str(self.iterindex)
+#        self.iterindex += 1
+#        return self.index[next_reference]
 
 if __name__ == "__main__":
 
     idx = UKGWAIndex()
     idx.indexfromweb()
     idx.indextofile("testatozfile.txt")
+    for x in idx:
+        print("Entry",x)
+        break
 
-    print(idx.indexlookup("UKGWA.5"))
+    print(idx.lookup("UKGWA.5"))
+    idx.update_field("UKGWA.5", "CATREF", "HO 42")
+    idx.update_field("UKGWA.9", "CATREF", "HO 47")
+    print(idx.lookup("UKGWA.5"))
+
+    Q = QueryEngine()
+    Q.add_view("AtoZ", idx)
+    filt = Q.filter_view("AtoZ","CATREF",'<>',"N")
+    for f in filt:
+        print("Match",f)
+
