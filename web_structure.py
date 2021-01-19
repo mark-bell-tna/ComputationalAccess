@@ -21,7 +21,7 @@ class UKGWAStructure(UKGWAView):
 
         if identifier is None:
             identifier = url
-        parsed = self.parseurl(url)
+        parsed = self._parseurl(url)
         super().add_entry(self.index[identifier], [parsed.schem, parsed.netloc, parsed.path, parsed.query])
 
     def _parseurl(self, url):

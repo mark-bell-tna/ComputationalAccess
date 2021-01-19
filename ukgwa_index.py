@@ -52,14 +52,14 @@ class UKGWAIndex(UKGWAView):
             break
 
         if update:
-            self.matchukgwatodiscovery()
+            self._matchukgwatodiscovery()
 
-    def matchukgwatodiscovery(self):
+    def _matchukgwatodiscovery(self):
 
         for idx in self:
-            url = idx.get_field(idx, 'URL')
+            url = self.get_field(idx, 'URL')
             if url in self.discoverylookup:
-                idx.update_field(idx, 'CATREF', self.discoverylookup[url])
+                self.update_field(idx, 'CATREF', self.discoverylookup[url])
 
     def indexfromweb(self):
 
@@ -100,6 +100,7 @@ if __name__ == "__main__":
     idx = UKGWAIndex()
     idx.indexfromweb()
     idx.indextofile("testatozfile.txt")
+    idx.discoveryfromfile("/home/research1/WEBARCH/5VIEWS/Data/disco_ukgwa_links.txt")
     for x in idx:
         print("Entry",x)
         break
@@ -114,4 +115,5 @@ if __name__ == "__main__":
     filt = Q.filter_view("AtoZ","CATREF",'<>',"N")
     for f in filt:
         print("Match",f)
+        break
 
