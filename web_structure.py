@@ -22,7 +22,7 @@ class UKGWAStructure(UKGWAView):
         if identifier is None:
             identifier = url
         parsed = self._parseurl(url)
-        super().add_entry(identifier, [parsed.schem, parsed.netloc, parsed.path, parsed.query])
+        super().add_entry(identifier, [parsed.scheme, parsed.netloc, parsed.path, parsed.query])
 
     def _parseurl(self, url):
 
@@ -48,7 +48,6 @@ if __name__ == "__main__":
     print(struc.domaintotree(parsed.netloc))
     print(struc.domaintotree(parsed.netloc, strip_www = True))
     print(struc.domaintotree(parsed.netloc, path = parsed.path, strip_www = True))
-    exit()
     struc.add_entry("www.gov.uk", 5)
     print(struc.index)
     struc.add_entry("www.gov.uk")

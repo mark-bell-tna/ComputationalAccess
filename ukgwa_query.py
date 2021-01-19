@@ -50,7 +50,7 @@ class QueryEngine:
     def __next__(self):
 
         next_item =  next(self.select_iter)
-        while not next_item:
+        while not self.selections[next_item]:
             next_item = next(self.select_iter)
         return next_item
 
