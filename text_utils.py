@@ -8,18 +8,25 @@ from bisect import bisect_left
 
 class SuffixTree:
 
-    token_list = ["ROOTNODE"]
-    all_trails = []
-    trail_summary = {}
-    reference_list = []
-    reference_lookup = {}
+    #token_list = ["ROOTNODE"]
+    #all_trails = []
+    #trail_summary = {}
+    #reference_list = []
+    #reference_lookup = {}
 
-    def __init__(self, position, stopwords = set()):
+    def __init__(self, position, reference_list = [], reference_lookup = {}, trail_summary = {},
+            all_trails = [], token_list = ["ROOTNODE"], stopwords = set()):
 
+        self.tree = {}
         self.children = []
         self.position = position
         self.length = 0
         self.stopwords = stopwords
+        self.token_list = token_list
+        self.all_trails = all_trails
+        self.trail_summary = trail_summary
+        self.reference_list = reference_list
+        self.reference_lookup = reference_lookup
 
     def add_tokens(self, tokens, reference = None):
 
@@ -28,10 +35,10 @@ class SuffixTree:
             return
         token_list.append('$')
         for tok in token_list:
-            SuffixTree.token_list.append(tok)
-        start_pos = len(SuffixTree.token_list) - len(token_list)
-        SuffixTree.reference_list.append(start_pos)
-        SuffixTree.reference_lookup[start_pos] = [start_pos, len(token_list), reference]
+            self.token_list.append(tok)
+        start_pos = len(self.token_list) - len(token_list)
+        self.reference_list.append(start_pos)
+        self.reference_lookup[start_pos] = [start_pos, len(token_list), reference]
         #print("Adding",tokens,start_pos)
         for i in range(len(token_list)):
             suffix = token_list[i:]
@@ -39,12 +46,19 @@ class SuffixTree:
 
     def _add_trail(self, trail):
         #print("\t\tAdd trail",trail)
-        trail_summary = SuffixTree.trail_summary
+        trail_summary = self.trail_summary
         if trail[1] not in trail_summary:
             trail_summary[trail[1]] = {}
         if trail[2] not in trail_summary[trail[1]]:
             trail_summary[trail[1]][trail[2]] = set()
         trail_summary[trail[1]][trail[2]].add(trail[0])
+
+    #def _add_suffix_no_recurse(self, tokens, start_pos):
+#
+#        this_tree = self.tree
+#        children = this_tree.keys()
+#        for ch in children:
+#            if self.token_list[ch] == tok:
 
     def _add_suffix(self, tokens, start_pos, trail):
         # TODO: for compactness, if a branch has no further branches then record the length of branch rather than create new nodes
@@ -59,7 +73,7 @@ class SuffixTree:
         found = False
         for ch in self.children:
             #print("\t\ttoken",tok,"position",ch.position)
-            if SuffixTree.token_list[ch.position] == tok:  # Compare token to value in list lookup
+            if self.token_list[ch.position] == tok:  # Compare token to value in list lookup
                 this_trail[1] = ch.position - this_trail[2]
                 this_trail[2] += 1
                 if len(tokens) > 1: # If there are still more to process
@@ -75,7 +89,13 @@ class SuffixTree:
             if len(self.children) > 0:
                 this_trail = []
             #    print("\t\tHas children")
-            self.children.append(SuffixTree(start_pos))
+                #all_trails = []
+    #trail_summary = {}
+    #reference_list = []
+    #reference_lookup = {}
+
+            self.children.append(SuffixTree(start_pos, all_trails = self.all_trails, trail_summary = self.trail_summary,
+                reference_list = self.reference_list, reference_lookup = self.reference_lookup ))  # why does this need to be a SuffixTree object?
             #elif:
             #    this_trail[1] = this_trail[0]
             #this_trail[2] += 1
@@ -94,13 +114,13 @@ class SuffixTree:
                 nodes.append([ch, n[1]+1])
 
     def get_trails(self):
-        return SuffixTree.all_trails
+        return self.all_trails
 
     def get_reference_list(self):
-        return SuffixTree.reference_list
+        return self.reference_list
 
     def get_reference_lookup(self):
-        return SuffixTree.reference_lookup
+        return self.reference_lookup
 
     def _filter_trails(self, min_matches, min_length, max_length=1000):
 
@@ -264,7 +284,7 @@ class SuffixTree:
 
     def __str__(self):
         #return str(self.this_position)
-        return SuffixTree.token_list[self.position]
+        return self.token_list[self.position]
 
 if __name__ == "__main__":
 
@@ -283,7 +303,7 @@ if __name__ == "__main__":
     sf.add_tokens(["papa","alpha","papa","alpha"])
     sf.add_tokens(["papa","alpha","papa"])
 
-    print(SuffixTree.token_list)
+    print(sf.token_list)
     #sf.printtree()
                 
     #trails = sf.get_trails()
@@ -303,7 +323,7 @@ if __name__ == "__main__":
     for k1,v1 in trail_summary.items():
         print("Key",k1,"Vals",v1)
         for k2,v2 in v1.items():
-            print("\tCounts:",[SuffixTree.token_list[x] for x in range(k1,k1+max(k2,1))], v2)
+            print("\tCounts:",[sf.token_list[x] for x in range(k1,k1+max(k2,1))], v2)
             #print("Counts:",[x for x in range(k1,k1+k2+1)], k1,v1,k2,v2)
 
 
