@@ -15,7 +15,6 @@ from cdx_reader import CDXReader
 from socket import error as SocketError
 import bs4
 from bs4 import BeautifulSoup
-import grequests
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from requests_futures.sessions import FuturesSession
 import pickle
