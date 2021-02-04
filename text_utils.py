@@ -149,10 +149,7 @@ class SuffixTree:
                             matched = False
                 if matched:
                     if i_ngram[0][0] == 'National' and i_ngram[0][1] == 'Health':
-                        print("Matched:",i_ngram)
-                        print("To:",sorted_ngrams[j])
                         j_ngram[3] -= i_ngram[2]   # update length of j ngram by subtracting longer string
-                        print("Updated",sorted_ngrams[j])
                     else:
                         j_ngram[3] -= i_ngram[2]   # update length of j ngram by subtracting longer string
                     #break
