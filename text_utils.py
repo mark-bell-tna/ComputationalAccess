@@ -59,26 +59,26 @@ class TreeNode:
 
 class SuffixTree:
 
-    def __init__(self, position, length = 0, reference_list = [], reference_lookup = {}, trail_summary = {},
-            all_trails = [], token_list = ["ROOTNODE"], stopwords = set()):
+    #def __init__(self, position, length = 0, reference_list = [], reference_lookup = {}, trail_summary = {},
+    #        all_trails = [], token_list = ["ROOTNODE"], stopwords = set()):
+    def __init__(self, stopwords=set(), eol_symbol = '$'):
 
-        self.tree = TreeNode(position, length)
-        self.position = position
-        self.length = length
+        self.tree = TreeNode(0, 1)
+        #self.position = position
+        #self.length = length
         self.stopwords = stopwords
+        self.eol_symbol = eol_symbol
         self.token_lookup = {}
         self.lookup_count = 0
-        self.token_list = token_list
-        self.all_trails = all_trails
-        self.trail_summary = trail_summary
-        self.reference_list = reference_list
-        self.reference_lookup = reference_lookup
-        debugprint("\t***New Suffix at",position,"length",length,
-              "words",self.token_list[position:position+length],"****")
+        self.token_list = ["ROOTNODE"]  #token_list
+        #self.all_trails = all_trails
+        #self.trail_summary = trail_summary
+        self.reference_list = [] #reference_list
+        self.reference_lookup = {} #reference_lookup
 
     def _preprocess_tokens(self, tokens, add_ending=True):
         if add_ending:
-            return [t for t in tokens if t.lower() not in self.stopwords] + ['$']
+            return [t for t in tokens if t.lower() not in self.stopwords] + [self.eol_symbol]
         else:
             return [t for t in tokens if t.lower() not in self.stopwords]
 
@@ -184,7 +184,7 @@ class SuffixTree:
             this_text = self.token_list[branch.position:branch.position+branch.length]
             for i in range(len(this_text)):
                 new_text = text + this_text[:i+1]
-                if new_text[-1] != '$' and len(new_text) >= min_length:
+                if new_text[-1] != self.eol_symbol and len(new_text) >= min_length:
                     ngrams.append([new_text, size])
             if not branch.is_leaf:
                 for ch in branch.children:
@@ -203,7 +203,7 @@ class SuffixTree:
             branch = self._get_branch(match_path)
             debugprint("Searched",tokens,"Matched",match_count,"of",len(tokens),"Matches:",match,"Branch",branch)
             if match_count == len(tokens):
-                self.printtree(branch)
+                #self.printtree(branch)
                 leaves = self._get_leaves(branch)
                 for l in leaves:
                     ref = self.get_ngram_reference(l)
@@ -280,9 +280,6 @@ class SuffixTree:
                         #                                  length=len(token_suffix)-match_count))
                         branch.add_child(start_pos+i+match_count, length=len(token_suffix)-match_count)
                         branch.children[-1].children.append(start_pos)
-                if match_count > 1000:
-                    self.add_trail(branch.position-match_count+branch.length, match_count, start_pos)
-                        
 
     def _search_suffix(self, tokens, preprocess=False):
 
@@ -344,27 +341,12 @@ class SuffixTree:
     def __repr__(self):
         return " ".join(self.token_list[self.position:self.position+self.length])
 
-    # Need a more intuitive name than trail - maybe ngram matches or similar?
-    #def add_trail(self, start, length, identifier):
-
-    #    if self.token_list[start+length-1] == '$':
-    #        length -= 1
-    #    if start not in self.trail_summary:
-    #        self.trail_summary[start] = {}
-    #    this_trail = self.trail_summary[start]
-    #    if length not in this_trail:
-    #        this_trail[length] = set()
-    #    match_list = this_trail[length]
-    #    match_list.add(identifier)
-
     def _get_branch(self, path):
         
         this_branch = self.tree
         for p in path:
-            #print("P:",p,"Child count:",len(this_branch.children),"branch",this_branch)
             this_branch = this_branch.children[p]
         return this_branch
-
 
     def printtree(self, tree, limit=20):
         
@@ -560,7 +542,7 @@ class SuffixTree:
 
 if __name__ == "__main__":
 
-    ST = SuffixTree(0,1)
+    ST = SuffixTree()
 
     strings = ['Tackling Drugs Changing Lives',
                'Tackling Drugs to Build a Better Britain',
@@ -576,17 +558,14 @@ if __name__ == "__main__":
                'My London 2012 Mascots',
                'Fit for London 2012',
                'Olympic Legacy Speech 5th July 2012']
-    strings = ['London 2012',
-               'London 2012 Olympics',
-               'Visit London']
+    #strings = ['London 2012',
+    #           'London 2012 Olympics',
+    #           'Visit London']
     #strings = ['Crown',
     #           'Crown Prosecution Service',
     #           'Crown Prosecution Service Inspectorate',
     #           'Crown']
 
-    ngrams = [[['National'],8], [['National','Health'],4], [['National','Health','Service'],4]]
-    print(ST.collapse_ngrams(ngrams,1))
-    exit()
     counter = 0
     for s in strings:
         counter += 1
@@ -595,7 +574,7 @@ if __name__ == "__main__":
     print(ST.token_list)
     print(ST.tree.get_tree_size())
     print(ST.tree.get_branch_size())
-    print(ST.get_ngrams(2))
+    print(ST.get_phrases(2,2,4))
     #print(sf.trail_summary)
     #ST.search_tokens(['Bovine'])
     #ST.search_tokens(['Crown','Estate'])
@@ -606,75 +585,6 @@ if __name__ == "__main__":
     #ST.search_tokens(['London','2012'])
     exit()
 
-    sf.new_add_tokens(["while"])
-    sf.newprinttree()
-    sf.new_add_tokens(["while","shepherds","watched"])
-    sf.newprinttree()
-    #print("Children",len(sf.children),sf.position, sf.length)
-    #print("Children",len(sf.children[0].children),sf.children[0].position, sf.children[0].length)
-    #for ch in sf.children[0].children:
-    #    print("Children",len(ch.children),ch.position, ch.length)
-    sf.new_add_tokens(["while","shepherds","ate"])
-    sf.new_add_tokens(["while","shepherds","ate"])
-    sf.new_add_tokens(["while","goatherds","ate"])
-    sf.new_add_tokens(["shepherds","ate"])
-    #sf.newprinttree()
-    sf.new_add_tokens(["while","shepherds","watched","their"])
-    sf.newprinttree()
-    exit()
-    print("Tree state",sf.position, sf.length)
-    print([(ch.position, ch.length) for ch in sf.children])
-    sf.new_add_tokens(["while","shepherds"])
-    print([(ch.position, ch.length) for ch in sf.children])
-    #sf.new_add_tokens(["while","shepherds"])
-    #print([(ch.position, ch.length) for ch in sf.children])
-
-
-    exit()
-    sf.add_tokens(["while","shepherds","watched","tv","at","night"])
-    sf.add_tokens(["while","shepherds","watched","tv","at","night"])
-    sf.add_tokens(["red","sky","etc"])
-    #sf.add_tokens(["red","sky","etc"])
-    #sf.add_tokens(["red","sky","etc"])
-    sf.add_tokens(["red"])
-    sf.add_tokens(["red"])
-#    sf.add_tokens(["red"])
-    sf.add_tokens(["red","red","robin"])
-    sf.add_tokens(["red","sky","etc"])
-    sf.add_tokens(["papa","alpha","papa","alpha"])
-    sf.add_tokens(["papa","alpha","papa"])
-
-    print(sf.token_list)
-    sf.printtree()
-    search = sf.search_suffix(["while","shepherds","watched"])
-    print(search)
-    print(sf.token_list)
-    exit()
-                
-    sf.add_tokens(["while","shepherds","watched"],no_recurse=True)
-    #trails = sf.get_trails()
-    #print(trails)
-    #trail_summary = {}
-    #for t in trails:
-    #    if t[1] not in trail_summary:
-    #        trail_summary[t[1]] = {}
-    #    if t[2] not in trail_summary[t[1]]:
-    #        trail_summary[t[1]][t[2]] = set()
-    #    trail_summary[t[1]][t[2]].add(t[0])
-
-        #print([SuffixTree.token_list[x] for x in range(t[0],t[0]+t[2])], t[2])
-
-    #trail_summary = sf.trail_summary
-    #print(trail_summary)
-    #for k1,v1 in trail_summary.items():
-    #    print("Key",k1,"Vals",v1)
-    #    for k2,v2 in v1.items():
-    #        print("\tCounts:",[sf.token_list[x] for x in range(k1,k1+max(k2,1))], v2)
-    #        #print("Counts:",[x for x in range(k1,k1+k2+1)], k1,v1,k2,v2)
-#
-#    print(sf.search_suffix(["shepherds","watched"]))
-#
-#    print(sf.all_trails)
 
 def text_to_parts(text):
     parts = []

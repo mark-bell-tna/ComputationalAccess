@@ -12,9 +12,10 @@ class QueryEngine:
 
     def filter_view(self, identifier, *args):
         view = self.views[identifier]
-        for idx in view:
-            if view.comparison(idx, *args):
-                yield idx
+        for idx in view._filter(*args):
+            yield idx
+            #if view.comparison(idx, *args):
+            #    yield idx
 
     def exclude(self, identifier):
         self._set_select(identifier, False, override = True)
@@ -59,8 +60,6 @@ if __name__ == '__main__':
     for i in range(20):
         Q.update(i, i % 3 == 0)
     print(Q.selections)
-    for s in Q:
-        print(s)
     print(Q.selections[3])
     Q.exclude(3)
     print(Q.selections[3])

@@ -22,6 +22,11 @@ class UKGWAView:
         else:
             return ops[relation](index_value, value)
 
+    def _filter(self, field, operator, value):
+        for idx in self:
+            if self.comparison(idx, field, operator, value):
+                yield idx
+
     def comparison(self, key, field, operator, value):
 
         if key not in self.index:
