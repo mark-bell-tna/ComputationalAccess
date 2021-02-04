@@ -16,7 +16,7 @@ from socket import error as SocketError
 import bs4
 from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from requests_futures.sessions import FuturesSession
+#from requests_futures.sessions import FuturesSession
 import pickle
 from operator import itemgetter
 from os.path import isdir
