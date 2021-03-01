@@ -78,9 +78,9 @@ class SuffixTree:
 
     def _preprocess_tokens(self, tokens, add_ending=True):
         if add_ending:
-            return [t for t in tokens if t.lower() not in self.stopwords] + [self.eol_symbol]
+            return [t.lower() for t in tokens if t.lower() not in self.stopwords] + [self.eol_symbol]
         else:
-            return [t for t in tokens if t.lower() not in self.stopwords]
+            return [t.lower() for t in tokens if t.lower() not in self.stopwords]
 
     def get_token_counts(self):
 
@@ -164,7 +164,7 @@ class SuffixTree:
             else:
                 j += 1
 
-        return([ng for ng in sorted_ngrams if ng[3] >= min_count])
+        return([[ng[0],ng[3]] for ng in sorted_ngrams if ng[3] >= min_count])
 
 
     def _get_ngrams(self, min_count=1, min_length=1):
@@ -191,7 +191,7 @@ class SuffixTree:
     def search_tokens(self, *tokens_list):
 
         match_list = set()
-        print(tokens_list)
+        #print(tokens_list)
         for tokens in tokens_list:
             tokens = self._preprocess_tokens(tokens, add_ending=False)
             match = self._search_suffix(tokens)
@@ -572,6 +572,8 @@ if __name__ == "__main__":
     print(ST.tree.get_tree_size())
     print(ST.tree.get_branch_size())
     print(ST.get_phrases(2,2,4))
+    print(ST.tree.children)
+    print(ST.token_lookup)
     #print(sf.trail_summary)
     #ST.search_tokens(['Bovine'])
     #ST.search_tokens(['Crown','Estate'])

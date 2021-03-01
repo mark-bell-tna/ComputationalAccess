@@ -1,5 +1,4 @@
 from ukgwa_view import UKGWAView
-from ukgwa_query import QueryEngine
 from text_utils import SuffixTree
 
 class UKGWATextIndex(UKGWAView):
