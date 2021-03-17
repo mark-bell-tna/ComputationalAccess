@@ -215,9 +215,9 @@ class SuffixTree:
 
         if len(token_list) == 1:
             return
+        start_pos = len(self.token_list)
         for tok in token_list:
             self.token_list.append(tok)
-        start_pos = len(self.token_list) - len(token_list)
         self.reference_list.append(start_pos)
         self.reference_lookup[start_pos] = [start_pos, len(token_list), reference]
         for i in range(len(token_list)-1):
