@@ -6,7 +6,7 @@ from ukgwa_query import QueryEngine
 
 class UKGWAIndex(UKGWAView):
 
-    def __init__(self, ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/",
+    def __init__(self, ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/ukgwa/",
                        index_url = "http://www.nationalarchives.gov.uk/webarchive/atoz/",
                        id_prefix = "UKGWA",
                        file_delimiter = "|"):
@@ -34,7 +34,7 @@ class UKGWAIndex(UKGWAView):
         atozfile.close()
 
     def indextofile(self, filepath):
-        
+
         indexfile = open(filepath, 'w')
         for idx in self:
             indexfile.write(self.filedelimiter.join([str(x) for x in self.index[idx]]))
@@ -116,4 +116,3 @@ if __name__ == "__main__":
     for f in filt:
         print("Match",f)
         break
-

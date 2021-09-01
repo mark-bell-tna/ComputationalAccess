@@ -31,7 +31,7 @@ class Crawl:
                  data_folder = "./", hash_function = hashlib.md5, max_text_length = 30, folder_partitions=5):
         self.url = url
         self.ukgwa_protocol = "https://"
-        self.ukgwa_prefix = "webarchive.nationalarchives.gov.uk/"
+        self.ukgwa_prefix = "webarchive.nationalarchives.gov.uk/ukgwa/"
         self.snap_re = re.compile("[0-9]{14}")
         self.data_folder = data_folder
         self.save_root = data_folder
@@ -122,7 +122,7 @@ class Crawl:
         site_dir = self.save_root + self.site
         #if not isdir(site_dir):
         #    mkdir(site_dir)
-        
+
     def set_root(self, folder):
         self.save_root = folder
         if folder[-1] != "/":
@@ -157,7 +157,7 @@ class Crawl:
         self.data_folder = folder
         if folder[-1] != "/":
             self.data_folder += "/"
-    
+
     # Uses urlparse to split url into constituent parts
     # Pre-processes url to remove ukgwa address and snaphot if present
     # Return value is a list containing the ParseResult object (see urllib) and the snapshot value
@@ -187,7 +187,7 @@ class Crawl:
             this_url = url
         else:
             this_url = urlunparse(url)
-        
+
         if this_url[0:4] != "http":
             return("https://" + self.ukgwa_prefix + "/" + snapshot + "/" + self.protocol + "//" + this_url)
         else:
@@ -220,7 +220,7 @@ class Crawl:
         self.url_list.append(url)
 
     def process_urls(self, more_links = True):
-        
+
         while len(self.url_list) > 0:
             these_urls = self.url_list[0:self.folder_partitions]
             self.url_list = self.url_list[self.folder_partitions:]
@@ -307,7 +307,7 @@ class Crawl:
             return [e.code, None]
         else:
             return [html.status, html]
-            
+
 
     def filter_pages(self, page_status, page_type, return_types = [200], page_types = ['text/html','text']):
         if page_status not in return_types:
@@ -333,7 +333,7 @@ class Crawl:
         #    print(l['href'])
 
         return soup
- 
+
     def get_html_links(self, soup, parent, filter = set(), return_orig = False):
         page_links = []
         links = [l for l in soup.find_all('a', href=True)]
@@ -399,7 +399,7 @@ class Crawl:
 
     def write_soup_to_file(self, soup, folder, filename, url):
 
-        html_links = self.get_html_links(soup, parent = url, filter = self.links_filter, return_orig = True)   
+        html_links = self.get_html_links(soup, parent = url, filter = self.links_filter, return_orig = True)
         print("Writing to:", folder + filename)
         page_file = open(folder + filename,"w")
         to_keep = dict([(l[1],l[0][8+len(self.ukgwa_prefix)+16:]) for l in html_links])
@@ -437,7 +437,7 @@ class Crawl:
         #           #if c.name == "a":
         #           #    #print(c.get('href'),"is a",c.name)
         page_file.close()
-                
+
     def snap_filter(self, snapshot):
         this_year = int(snapshot[0:4])
         snap_year = int(self.snapshot[0:4])
@@ -469,7 +469,7 @@ class Crawl:
                 soup = self.get_soup(html)
                 filename = self.url_to_filename(r.geturl())
                 self.write_soup_to_file(soup, self.data_folder + str(i) + "/", filename, r.geturl())
-        
+
     def load_pickles(self):
         try:
             self.sitemap.ngram_paths = pickle.load(open('crawler_ngram_' + self.site + "." + self.snapshot + '.pck','rb'))
@@ -487,7 +487,7 @@ class Crawl:
             self.earliest_links = pickle.load(open('crawler_earliest_links_' + self.site + "." + self.snapshot + '.pck','rb'))
         except:
             print("Not loaded")
-        
+
     def save_pickles(self):
         pickle.dump(self.sitemap.ngram_paths,open('crawler_ngram_' + self.site + "." + self.snapshot + '.pck','wb'))
         pickle.dump(self.new_urls, open('crawler_new_urls_' + self.site + "." + self.snapshot + '.pck','wb'))
@@ -505,7 +505,7 @@ class Crawl:
                 path += "/" + p
                 paths.add(path)
         return(list(paths))
-    
+
     def graph_from_soup(self, soup):
 
         G = nx.DiGraph()
@@ -597,7 +597,7 @@ class Crawl:
             #print(node_dict[N], N.name, p_id,  N.parent.name, content)
             #if "clientSide" in node_label: #Filter these out for now
             #    continue
- 
+
             node_id += 1
             if node_label not in self.site_labels:
                 self.site_labels[node_label] = len(self.site_labels)
@@ -660,7 +660,7 @@ class Crawl:
             self.site_labels = pickle.load(open(label_file, "rb"))
         else:
             self.site_labels = {}
-        
+
     def save_labels(self, label_file):
         pickle.dump(self.site_labels, open(label_file, "wb"))
 
@@ -700,5 +700,3 @@ if __name__ == "__main__":
     G = C.graph_from_soup(soup)
 
     #nx.write_gml(G, url_hash + ".gml")
-
-

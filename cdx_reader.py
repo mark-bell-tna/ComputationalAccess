@@ -10,7 +10,7 @@ class CDXReader(UKGWAView):
 
     def __init__(self, url):
         super().__init__()
-        self.ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/"
+        self.ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/ukgwa/"
         cdx_prefix = self.ukgwa_prefix + "-cdx?url="
         self.url = url
         self.cdx_url = cdx_prefix + url

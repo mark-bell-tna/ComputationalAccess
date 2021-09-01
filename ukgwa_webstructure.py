@@ -12,7 +12,7 @@ class UKGWAStructure(UKGWAView):
     def __init__(self):
 
         super().__init__()
-        self.ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/"
+        self.ukgwa_prefix = "https://webarchive.nationalarchives.gov.uk/ukgwa/"
         self.fields['SCHEME'] = 0
         self.fields['NETLOC'] = 1
         self.fields['PATH'] = 2
@@ -94,4 +94,3 @@ if __name__ == "__main__":
     print(struc.index)
     struc.add_entry("www.gov.uk")
     print(struc.index)
-

@@ -21,9 +21,9 @@ class UKGWASearch(UKGWAView):
         self.MAX_SAMPLE = 20
         self.SAMPLE_PCT = 0.1
         self.svd_k = 10
-        self.web_prefix = 'https://webarchive.nationalarchives.gov.uk/'
+        self.web_prefix = 'https://webarchive.nationalarchives.gov.uk/ukgwa/'
         self.search_url = self.web_prefix + "search/result/"
-        
+
 
     def search(self, search_string, random_pages = True):
 
@@ -68,7 +68,7 @@ class UKGWASearch(UKGWAView):
                 except urllib.error.HTTPError as e:
                     print("Retrying...",tries)
                     sleep(10)
-    
+
             if not found:
                 print("\tFailed to navigate to page")
                 return
